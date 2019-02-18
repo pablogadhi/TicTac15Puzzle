@@ -17,8 +17,7 @@ def solve_problem(problem):
             for action in problem.get_actions(path_edge):
                 new_path = Path(current_path.states, problem.step_cost_calculator,
                                 current_path.path_cost)
-                new_path.add_state(
-                    State(problem.get_result(action, path_edge), problem.heuristic_calculator))
+                new_path.add_state(problem.get_result(action))
                 new_path.update_path_cost(new_path.states[len(new_path.states) - 2],
                                           new_path.states[len(new_path.states) - 1])
                 frontier.append(new_path)
@@ -32,6 +31,7 @@ def select_next_path(frontier):
     for path in frontier:
         if a_star_condition(path) < a_star_condition(selected_path):
             selected_path = path
+            frontier.remove(path)
     return selected_path
 
 
