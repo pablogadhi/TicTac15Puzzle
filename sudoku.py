@@ -1,5 +1,6 @@
 import sys
-from utils import input_to_matrix, intersection, Position
+from copy import deepcopy
+from utils import input_to_matrix, intersection, find_empty_position
 from ps_engine.problem import Problem
 from ps_engine.state import State
 from ps_engine.core import solve_problem
@@ -16,13 +17,6 @@ def goal_test(state):
             if col == '.':
                 return False
     return True
-
-
-def find_empty_position(matrix):
-    for i in range(0, len(matrix)):
-        for j in range(0, len(matrix[0])):
-            if matrix[i][j] == '.':
-                return Position(i, j)
 
 
 def get_possibilities(matrix, position):
@@ -59,7 +53,7 @@ def get_possibilities(matrix, position):
 
 
 def set_value(**kwargs):
-    matrix = kwargs.get("matrix")
+    matrix = deepcopy(kwargs.get("matrix"))
     position = kwargs.get("position")
     value = kwargs.get("value")
     matrix[position.x][position.y] = value

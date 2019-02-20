@@ -20,6 +20,13 @@ def intersection(first_array, second_array):
     return inter
 
 
+def find_empty_position(matrix):
+    for i in range(0, len(matrix)):
+        for j in range(0, len(matrix[0])):
+            if matrix[i][j] == '.':
+                return Position(i, j)
+
+
 class Position:
     def __init__(self, x, y):
         self.x = x

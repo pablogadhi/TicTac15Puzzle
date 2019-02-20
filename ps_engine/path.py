@@ -1,6 +1,8 @@
+from copy import deepcopy
+
 class Path:
     def __init__(self, states, step_cost_calculator, path_cost=None):
-        self.states = states
+        self.states = deepcopy(states)
         self.last = states[len(states) - 1]
         self.step_cost_calculator = step_cost_calculator
         if path_cost is None:
