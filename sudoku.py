@@ -11,6 +11,8 @@ from ps_engine.core import solve_problem
 from ps_engine.action import Action
 from graphics import sudoku_grid, sudoku_grid_9
 
+DEBUG_MODE = False
+
 
 def step_cost_calculator(first_state, second_state):
     return 1
@@ -99,14 +101,12 @@ def get_result(action):
 
 
 def main(stdscr):
-    if len(sys.argv) != 2:
-        sys.exit(-1)
-
-    curses.use_default_colors()
-    curses.curs_set(False)
-    curses.init_pair(1, curses.COLOR_MAGENTA, -1)
-    stdscr.addstr(0, 0, "Procesando...", curses.color_pair(1))
-    stdscr.refresh()
+    if not DEBUG_MODE:
+        curses.use_default_colors()
+        curses.curs_set(False)
+        curses.init_pair(1, curses.COLOR_MAGENTA, -1)
+        stdscr.addstr(0, 0, "Procesando...", curses.color_pair(1))
+        stdscr.refresh()
 
     inp = sys.argv[1]
     mat = input_to_matrix(inp)
@@ -120,22 +120,39 @@ def main(stdscr):
     else:
         get_sudoku_grid = sudoku_grid_9
 
-    if result is not None:
-        for state in result.states:
-            flattened_matrix = lambda matrix: [val for row in matrix for val in row]
-            state_string = get_sudoku_grid(tuple(flattened_matrix(state.matrix)))
-            stdscr.addstr(0, 0, state_string, curses.color_pair(1))
+    if not DEBUG_MODE:
+        if result is not None:
+            for state in result.states:
+                flattened_matrix = lambda matrix: [val for row in matrix for val in row]
+                state_string = get_sudoku_grid(tuple(flattened_matrix(state.matrix)))
+                stdscr.addstr(0, 0, state_string, curses.color_pair(1))
+                stdscr.refresh()
+                sleep(.2)
+        else:
+            stdscr.addstr(0, 0, "No hay solucion!\n")
             stdscr.refresh()
-            sleep(.2)
-    else:
-        stdscr.addstr(0, 0, "No hay solucion!\n")
-        stdscr.refresh()
 
-    while True:
-        key = stdscr.getkey()
-        if key == 'q':
-            sys.exit(0)
+        while True:
+            key = stdscr.getkey()
+            if key == 'q':
+                sys.exit(0)
+    else:
+        if result is not None:
+            for state in result.states:
+                for row in state.matrix:
+                    print(row)
+                print()
+        else:
+            print("No hay solucion!")
 
 
 if __name__ == '__main__':
-    curses.wrapper(main)
+    argument_amount = len(sys.argv)
+    if argument_amount > 3 or argument_amount < 2:
+        print("Cantidad de argumentos inválida!")
+        sys.exit(-1)
+    elif len(sys.argv) == 3 and sys.argv[2] == "--debug":
+        DEBUG_MODE = True
+        main(None)
+    else:
+        curses.wrapper(main)
