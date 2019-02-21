@@ -12,9 +12,9 @@ def solve_problem(problem):
         if len(frontier) > 0:
             current_path = select_next_path(frontier)
             explored.append(current_path.last.matrix)
-            for i in current_path.last.matrix:
-                print(i)
-            print()
+            # for i in current_path.last.matrix:
+            #     print(i)
+            # print()
             path_edge = current_path.last
 
             if problem.goal_test(path_edge):

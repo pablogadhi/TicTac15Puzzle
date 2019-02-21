@@ -1,11 +1,14 @@
 import sys
+import curses
 from copy import deepcopy
-from utils import input_to_matrix, find_empty_position, Position
+from time import sleep
 
+from utils import input_to_matrix, find_empty_position, Position
 from ps_engine.problem import Problem
 from ps_engine.state import State
 from ps_engine.core import solve_problem
 from ps_engine.action import Action
+from graphics import puzzle_grid
 
 TARGET_POSITIONS = {
     '1': Position(0, 0),
@@ -33,6 +36,14 @@ GOAL = [['1', '2', '3', '4'],
 
 
 def step_cost_calculator(first_state, second_state):
+    # overall_distance = 0
+    # for i, row in enumerate(second_state.matrix):
+    #     for j, val in enumerate(row):
+    #         t_pos = TARGET_POSITIONS[val]
+    #         overall_distance += (abs(t_pos.x - i) + abs(t_pos.y - j)) * (
+    #                 len(second_state.matrix) - (t_pos.x * t_pos.y))
+    # return overall_distance
+
     first_blank_pos = find_empty_position(first_state.matrix)
     second_blank_pos = find_empty_position(second_state.matrix)
 
@@ -40,12 +51,17 @@ def step_cost_calculator(first_state, second_state):
     target_pos = TARGET_POSITIONS[swapped_value]
 
     if second_blank_pos.x == target_pos.x and second_blank_pos.y == target_pos.y:
-        return 16
+        return 7
 
-    step_cost = abs(target_pos.x - first_blank_pos.x) + abs(
+    first_state_distance = abs(target_pos.x - second_blank_pos.x) + abs(
+        target_pos.y - second_blank_pos.y)
+    second_state_distance = abs(target_pos.x - first_blank_pos.x) + abs(
         target_pos.y - first_blank_pos.y)
 
-    return step_cost
+    if second_state_distance <= first_state_distance:
+        return 0
+
+    return second_state_distance
 
 
 def goal_test(state):
@@ -90,15 +106,15 @@ def get_actions(state):
 
 
 def heuristic_calculator(matrix):
-    heuristic = 16
+    heuristic = 2 ** 16
     for i in range(0, len(matrix)):
         for j in range(0, len(matrix[0])):
             t_pos = TARGET_POSITIONS[matrix[i][j]]
             if t_pos.x == i and t_pos.y == j:
-                heuristic -= 1
+                heuristic /= 2
             else:
-                return heuristic
-    return heuristic
+                return heuristic / 1000
+    return heuristic / 1000
 
 
 def get_result(action):
@@ -106,9 +122,15 @@ def get_result(action):
     return State(new_matrix, heuristic_calculator)
 
 
-def main():
+def main(stdscr):
     if len(sys.argv) != 2:
         sys.exit(-1)
+
+    curses.use_default_colors()
+    curses.curs_set(False)
+    curses.init_pair(1, curses.COLOR_MAGENTA, -1)
+    stdscr.addstr(0, 0, "Procesando...", curses.color_pair(1))
+    stdscr.refresh()
 
     inp = sys.argv[1]
     mat = input_to_matrix(inp)
@@ -118,16 +140,21 @@ def main():
     result = solve_problem(problem)
 
     if result is not None:
-        # print(result.last.matrix)
         for state in result.states:
-            for row in state.matrix:
-                print(row)
-            print()
+            flattened_matrix = lambda matrix: [val for row in matrix for val in row]
+            state_string = puzzle_grid(tuple(flattened_matrix(state.matrix)))
+            stdscr.addstr(0, 0, state_string, curses.color_pair(1))
+            stdscr.refresh()
+            sleep(.2)
     else:
-        print("No hay solucion!")
+        stdscr.addstr(0, 0, "No hay solucion!\n")
+        stdscr.refresh()
 
-    sys.exit(0)
+    while True:
+        key = stdscr.getkey()
+        if key == 'q':
+            sys.exit(0)
 
 
 if __name__ == '__main__':
-    main()
+    curses.wrapper(main)
