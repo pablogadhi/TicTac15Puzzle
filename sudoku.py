@@ -1,4 +1,5 @@
 import sys
+import math
 from copy import deepcopy
 from utils import input_to_matrix, intersection, find_empty_position
 from ps_engine.problem import Problem
@@ -20,11 +21,11 @@ def goal_test(state):
 
 
 def get_possibilities(matrix, position):
-    v_possibilities = ['1', '2', '3', '4']
-    h_possibilities = ['1', '2', '3', '4']
-    sq_possibilities = ['1', '2', '3', '4']
+    v_possibilities = [str(i).zfill(1) for i in range(1, len(matrix) + 1)]
+    h_possibilities = [str(i).zfill(1) for i in range(1, len(matrix) + 1)]
+    sq_possibilities = [str(i).zfill(1) for i in range(1, len(matrix) + 1)]
 
-    for i in range(0, 4):
+    for i in range(0, len(matrix)):
         value = matrix[position.x][i]
         if value != '.':
             h_possibilities.remove(value)
@@ -33,18 +34,24 @@ def get_possibilities(matrix, position):
         if value != '.':
             v_possibilities.remove(value)
 
+    dim = int(math.sqrt(len(matrix)))
+
     offset_x = 0
-    if position.x % 2 != 0:
-        offset_x = -1
     offset_y = 0
-    if position.y % 2 != 0:
-        offset_y = -1
+    if dim == 2:
+        if position.x % 2 != 0:
+            offset_x = -1
+        if position.y % 2 != 0:
+            offset_y = -1
+    else:
+        offset_x = - (position.x % 3)
+        offset_y = - (position.y % 3)
 
     new_position_x = position.x + offset_x
     new_position_y = position.y + offset_y
 
-    for i in range(new_position_x, new_position_x + 2):
-        for j in range(new_position_y, new_position_y + 2):
+    for i in range(new_position_x, new_position_x + dim):
+        for j in range(new_position_y, new_position_y + dim):
             value = matrix[i][j]
             if value != '.':
                 sq_possibilities.remove(value)
@@ -71,7 +78,15 @@ def get_actions(state):
 
 
 def heuristic_calculator(matrix):
-    return 1
+    pos = find_empty_position(matrix)
+    if pos is None:
+        return 99
+
+    possibilities_amount = len(get_possibilities(matrix, pos))
+    if possibilities_amount == 0:
+        return 99
+    else:
+        return 1 - (1 / possibilities_amount)
 
 
 def get_result(action):

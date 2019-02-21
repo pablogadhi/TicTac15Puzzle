@@ -1,9 +1,13 @@
 def input_to_matrix(input_string):
     matrix = []
 
+    dimension = 4
+    if len(input_string) % 9 == 0:
+        dimension = 9
+
     index = 0
     for i, char in enumerate(input_string):
-        if i % 4 == 0:
+        if i % dimension == 0:
             matrix.append([])
             index += 1
 

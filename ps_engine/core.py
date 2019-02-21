@@ -12,9 +12,9 @@ def solve_problem(problem):
         if len(frontier) > 0:
             current_path = select_next_path(frontier)
             explored.append(current_path.last.matrix)
-            # for i in current_path.last.matrix:
-            #     print(i)
-            # print()
+            for i in current_path.last.matrix:
+                print(i)
+            print()
             path_edge = current_path.last
 
             if problem.goal_test(path_edge):
@@ -29,8 +29,6 @@ def solve_problem(problem):
                     new_path.update_path_cost(new_path.states[len(new_path.states) - 2],
                                               new_path.states[len(new_path.states) - 1])
                     frontier.append(new_path)
-                # else:
-                #     print(False)
 
         else:
             return None
@@ -40,10 +38,12 @@ def select_next_path(frontier):
     selected_path = Path([State([], 99999999999999)], None, 99999999999999)
     for path in frontier:
         if a_star_condition(path) < a_star_condition(selected_path):
-            selected_path = deepcopy(path)
-            frontier.remove(path)
-    return selected_path
+            selected_path = path
+    path_to_return = deepcopy(selected_path)
+    frontier.remove(selected_path)
+    return path_to_return
 
 
 def a_star_condition(path):
+    # print(path.path_cost, path.last.heuristic)
     return path.path_cost + path.last.heuristic

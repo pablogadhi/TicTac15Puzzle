@@ -7,7 +7,7 @@ from ps_engine.state import State
 from ps_engine.core import solve_problem
 from ps_engine.action import Action
 
-target_positions = {
+TARGET_POSITIONS = {
     '1': Position(0, 0),
     '2': Position(0, 1),
     '3': Position(0, 2),
@@ -26,29 +26,30 @@ target_positions = {
     '.': Position(3, 3),
 }
 
+GOAL = [['1', '2', '3', '4'],
+        ['5', '6', '7', '8'],
+        ['9', 'A', 'B', 'C'],
+        ['D', 'E', 'F', '.']]
+
 
 def step_cost_calculator(first_state, second_state):
     first_blank_pos = find_empty_position(first_state.matrix)
     second_blank_pos = find_empty_position(second_state.matrix)
 
-    x_diff = second_blank_pos.x - first_blank_pos.x
-    y_diff = second_blank_pos.y - first_blank_pos.y
+    swapped_value = second_state.matrix[first_blank_pos.x][first_blank_pos.y]
+    target_pos = TARGET_POSITIONS[swapped_value]
 
-    swapped_value = second_state.matrix[second_blank_pos.x - x_diff][second_blank_pos.y - y_diff]
-    target_pos = target_positions[swapped_value]
+    if second_blank_pos.x == target_pos.x and second_blank_pos.y == target_pos.y:
+        return 16
 
-    step_cost = abs(target_pos.x - (second_blank_pos.x - x_diff)) + abs(
-        target_pos.y - (second_blank_pos.y - y_diff))
+    step_cost = abs(target_pos.x - first_blank_pos.x) + abs(
+        target_pos.y - first_blank_pos.y)
+
     return step_cost
 
 
 def goal_test(state):
-    goal = [['1', '2', '3', '4'],
-            ['5', '6', '7', '8'],
-            ['9', 'A', 'B', 'C'],
-            ['D', 'E', 'F', '.']]
-
-    if state.matrix == goal:
+    if state.matrix == GOAL:
         return True
     else:
         return False
@@ -92,9 +93,11 @@ def heuristic_calculator(matrix):
     heuristic = 16
     for i in range(0, len(matrix)):
         for j in range(0, len(matrix[0])):
-            t_pos = target_positions[matrix[i][j]]
+            t_pos = TARGET_POSITIONS[matrix[i][j]]
             if t_pos.x == i and t_pos.y == j:
                 heuristic -= 1
+            else:
+                return heuristic
     return heuristic
 
 
@@ -115,7 +118,11 @@ def main():
     result = solve_problem(problem)
 
     if result is not None:
-        print(result.last.matrix)
+        # print(result.last.matrix)
+        for state in result.states:
+            for row in state.matrix:
+                print(row)
+            print()
     else:
         print("No hay solucion!")
 
